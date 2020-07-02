@@ -4,7 +4,6 @@ import 'package:flutterbachelor/timer_page.dart';
 
 import 'package:http/http.dart' as http;
 
-import 'dart:async';
 import 'dart:convert';
 
 class TODOList extends StatefulWidget {
@@ -15,11 +14,6 @@ class TODOList extends StatefulWidget {
   }
 
   List<Activity> activities;
-
-  // Receiving tasks from parent widget
-//  TODOList({@required this.activities});
-
-
 
 }
 
@@ -83,9 +77,7 @@ class _TODOListState extends State<TODOList> {
     }));
     if (response.statusCode == 201) {
       final responseData = json.decode(response.body);
-      print(responseData);
       Navigator.pushNamed(context, "/timer", arguments: ScreenArguments(responseData["_id"], responseData["name"], responseData["duration"] ));
-//      getActivites();
     } else {
       throw Exception('Failed to load Activity');
     }

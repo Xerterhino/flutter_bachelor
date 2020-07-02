@@ -56,7 +56,7 @@ class TODOState extends State<TODO> {
       routes: {
         '/': (context) => TODOList(),
         '/create': (context) => TODOCreate(onCreate: onTaskCreated,),
-        '/timer': (context) => TimerPage(name: "asd", duration: "asd", id: "asd"),
+        '/timer': (context) => TimerPage(name: "asd", duration: "111111", id: "asd"),
       },
     );
   }

@@ -24,8 +24,10 @@ class ScreenArguments {
 }
 
 class Dependencies {
-  final List<ValueChanged<ElapsedTime>> timerListeners = <ValueChanged<ElapsedTime>>[];
-  final TextStyle textStyle = const TextStyle(fontSize: 75.0, fontFamily: "Bebas Neue");
+  final List<ValueChanged<ElapsedTime>> timerListeners =
+      <ValueChanged<ElapsedTime>>[];
+  final TextStyle textStyle =
+      const TextStyle(fontSize: 75.0, fontFamily: "Bebas Neue");
   final Stopwatch stopwatch = new Stopwatch();
   final int timerMillisecondsRefreshRate = 30;
 }
@@ -35,18 +37,23 @@ class TimerPage extends StatefulWidget {
   final duration;
   final id;
 
-  TimerPage({Key key, @required this.name, @required this.duration, @required this.id}) : super(key: key);
+  TimerPage(
+      {Key key,
+      @required this.name,
+      @required this.duration,
+      @required this.id})
+      : super(key: key);
 
-  TimerPageState createState() => new TimerPageState(name: name, duration: duration, id: id);
+  TimerPageState createState() => new TimerPageState();
 }
 
 class TimerPageState extends State<TimerPage> {
   final Dependencies dependencies = new Dependencies();
-  final name;
-  final duration;
-  final id;
+  bool hasBeenReset = false;
 
-  TimerPageState({Key key, @required this.name, @required this.duration, @required this.id});
+  TimerPageState({
+    Key key,
+  });
 
   void leftButtonPressed() {
     setState(() {
@@ -54,6 +61,7 @@ class TimerPageState extends State<TimerPage> {
         print("${dependencies.stopwatch.elapsedMilliseconds}");
       } else {
         dependencies.stopwatch.reset();
+        this.hasBeenReset = true;
       }
     });
   }
@@ -64,57 +72,70 @@ class TimerPageState extends State<TimerPage> {
         dependencies.stopwatch.stop();
       } else {
         dependencies.stopwatch.start();
+//        this.hasBeenReset = false;
       }
     });
   }
 
-void saveActivity(String id, String name, String duration ) async {
-  final http.Response response = await http.put('http://192.168.178.20:8080/api/activity/' + id,
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<String, String>{
-        'name': name,
-        'duration': duration,
-        'finished': 'false'
-      }));
-  if (response.statusCode == 200) {
-//      final List responseData = json.decode(response.body);
-   Navigator.pushNamed(context, "/");
-  } else {
-    throw Exception('Failed to update Activity');
+  void saveActivity(String id, String name, String duration) async {
+    final http.Response response = await http.put(
+        'http://192.168.178.20:8080/api/activity/' + id,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'name': name,
+          'duration': duration,
+          'finished': 'false'
+        }));
+    if (response.statusCode == 200) {
+      Navigator.pushNamed(context, "/");
+    } else {
+      throw Exception('Failed to update Activity');
+    }
   }
-}
 
   Widget buildFloatingButton(String text, VoidCallback callback) {
-    TextStyle roundTextStyle = const TextStyle(fontSize: 16.0, color: Colors.white);
+    TextStyle roundTextStyle =
+        const TextStyle(fontSize: 16.0, color: Colors.white);
     return new FloatingActionButton(
-      heroTag: text,
+        heroTag: text,
         child: new Text(text, style: roundTextStyle),
         onPressed: callback);
+  }
+
+  String getActualTimeElapsed(String elapsedArgTime) {
+    if (hasBeenReset) {
+      return dependencies.stopwatch.elapsedMilliseconds.toString();
+    } else
+      return (dependencies.stopwatch.elapsedMilliseconds +
+              int.parse(elapsedArgTime))
+          .toString();
   }
 
   @override
   Widget build(BuildContext context) {
     final ScreenArguments args = ModalRoute.of(context).settings.arguments;
-    final TextEditingController controller = TextEditingController(text: args.name );
+    final TextEditingController controller =
+        TextEditingController(text: args.name);
 
-    return new Scaffold (body: Column(
+    final calcDuration = hasBeenReset ? '0' : args.duration;
+
+    return new Scaffold(
+        body: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         new Expanded(
-          child: new TimerText(dependencies: dependencies),
+          child: new TimerText(
+              dependencies: dependencies,
+              duration: calcDuration,
+              hasBeenReset: hasBeenReset),
         ),
-    Padding(
-    padding: EdgeInsets.all(16),
-    child:TextField(
-              // Opens the keyboard automatically
-//                autofocus: true,
+        Padding(
+            padding: EdgeInsets.all(16),
+            child: TextField(
                 controller: controller,
-                decoration: InputDecoration(
-                    labelText: 'Name'
-                )
-            )),
+                decoration: InputDecoration(labelText: 'Name'))),
         new Expanded(
           flex: 0,
           child: new Padding(
@@ -122,9 +143,16 @@ void saveActivity(String id, String name, String duration ) async {
             child: new Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                buildFloatingButton(dependencies.stopwatch.isRunning ? "lap" : "reset", leftButtonPressed),
-                buildFloatingButton(dependencies.stopwatch.isRunning ? "stop" : "start", rightButtonPressed),
-                buildFloatingButton("Save",() => saveActivity(args.id, controller.text, dependencies.stopwatch.elapsedMilliseconds.toString())),
+                buildFloatingButton(
+                    dependencies.stopwatch.isRunning ? "lap" : "reset",
+                    leftButtonPressed),
+                buildFloatingButton(
+                    dependencies.stopwatch.isRunning ? "stop" : "start",
+                    rightButtonPressed),
+                buildFloatingButton(
+                    "Save",
+                    () => saveActivity(args.id, controller.text,
+                        getActualTimeElapsed(args.duration))),
               ],
             ),
           ),
@@ -135,21 +163,33 @@ void saveActivity(String id, String name, String duration ) async {
 }
 
 class TimerText extends StatefulWidget {
-  TimerText({this.dependencies});
   final Dependencies dependencies;
+  final String duration;
+  final bool hasBeenReset;
 
-  TimerTextState createState() => new TimerTextState(dependencies: dependencies);
+  TimerText({Key key, this.dependencies, this.duration, this.hasBeenReset});
+
+  TimerTextState createState() => new TimerTextState(
+      dependencies: dependencies,
+      duration: duration,
+      hasBeenReset: hasBeenReset);
 }
 
 class TimerTextState extends State<TimerText> {
-  TimerTextState({this.dependencies});
+  TimerTextState({this.dependencies, this.duration, this.hasBeenReset});
+
   final Dependencies dependencies;
+  String duration;
+  final bool hasBeenReset;
+
   Timer timer;
   int milliseconds;
 
   @override
   void initState() {
-    timer = new Timer.periodic(new Duration(milliseconds: dependencies.timerMillisecondsRefreshRate), callback);
+    timer = new Timer.periodic(
+        new Duration(milliseconds: dependencies.timerMillisecondsRefreshRate),
+        callback);
     super.initState();
   }
 
@@ -162,7 +202,10 @@ class TimerTextState extends State<TimerText> {
 
   void callback(Timer timer) {
     if (milliseconds != dependencies.stopwatch.elapsedMilliseconds) {
-      milliseconds = dependencies.stopwatch.elapsedMilliseconds;
+      milliseconds = widget.hasBeenReset
+          ? dependencies.stopwatch.elapsedMilliseconds
+          : dependencies.stopwatch.elapsedMilliseconds +
+              int.parse(widget.duration);
       final int hundreds = (milliseconds / 10).truncate();
       final int seconds = (hundreds / 100).truncate();
       final int minutes = (seconds / 60).truncate();
@@ -182,7 +225,6 @@ class TimerTextState extends State<TimerText> {
     return Padding(
       padding: EdgeInsets.all(16),
       child: new Row(
-
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           new RepaintBoundary(
@@ -205,13 +247,16 @@ class TimerTextState extends State<TimerText> {
 
 class MinutesAndSeconds extends StatefulWidget {
   MinutesAndSeconds({this.dependencies});
+
   final Dependencies dependencies;
 
-  MinutesAndSecondsState createState() => new MinutesAndSecondsState(dependencies: dependencies);
+  MinutesAndSecondsState createState() =>
+      new MinutesAndSecondsState(dependencies: dependencies);
 }
 
 class MinutesAndSecondsState extends State<MinutesAndSeconds> {
   MinutesAndSecondsState({this.dependencies});
+
   final Dependencies dependencies;
 
   int minutes = 0;
@@ -242,6 +287,7 @@ class MinutesAndSecondsState extends State<MinutesAndSeconds> {
 
 class Hundreds extends StatefulWidget {
   Hundreds({this.dependencies});
+
   final Dependencies dependencies;
 
   HundredsState createState() => new HundredsState(dependencies: dependencies);
@@ -249,6 +295,7 @@ class Hundreds extends StatefulWidget {
 
 class HundredsState extends State<Hundreds> {
   HundredsState({this.dependencies});
+
   final Dependencies dependencies;
 
   int hundreds = 0;
