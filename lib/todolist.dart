@@ -22,8 +22,8 @@ class _TODOListState extends State<TODOList> {
 
   @override
   void initState() {
-    super.initState();
     getActivites();
+    super.initState();
   }
 
   void getActivites() async {

@@ -90,6 +90,7 @@ class TimerPageState extends State<TimerPage> {
         }));
     if (response.statusCode == 200) {
       Navigator.pushNamed(context, "/");
+//      Navigator.pushNamed(context, "/notification");
     } else {
       throw Exception('Failed to update Activity');
     }
@@ -113,6 +114,10 @@ class TimerPageState extends State<TimerPage> {
           .toString();
   }
 
+  Future<bool> _onBackPressed() {
+    Navigator.pushNamed(this.context, "/");
+  }
+
   @override
   Widget build(BuildContext context) {
     final ScreenArguments args = ModalRoute.of(context).settings.arguments;
@@ -120,8 +125,9 @@ class TimerPageState extends State<TimerPage> {
         TextEditingController(text: args.name);
 
     final calcDuration = hasBeenReset ? '0' : args.duration;
-
-    return new Scaffold(
+    return WillPopScope(
+        onWillPop: _onBackPressed,
+    child: new Scaffold(
         body: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -158,7 +164,7 @@ class TimerPageState extends State<TimerPage> {
           ),
         ),
       ],
-    ));
+    )));
   }
 }
 
