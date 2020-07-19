@@ -48,12 +48,23 @@ class _TODOListState extends State<TODOList> {
     }
   }
 
-  Text getDurationFromMs(String ms) {
-    Duration tmp = new Duration(milliseconds: int.parse(ms));
+  Text getDurationFromMs(String input) {
+  /*  Duration tmp = new Duration(milliseconds: int.parse(ms));
     int seconds = tmp.inSeconds;
     int minutes = (seconds/60).floor();
     int displaySeconds = seconds%60;
-    return Text(minutes.toString() + ":" + displaySeconds.toString());
+*/
+
+
+    double s = double.parse(input);
+    double ms = s % 1000;
+    s = (s - ms) / 1000;
+    double secs = s % 60;
+    s = (s - secs) / 60;
+    double mins = s % 60;
+    double hrs = (s - mins) / 60;
+    return Text(mins.round().toString() + ':' + secs.round().toString() + '.' + ms.round().toString());
+    //return Text(minutes.toString() + ":" + displaySeconds.toString());
   }
 
   void deleteActivity(String activityId) async{

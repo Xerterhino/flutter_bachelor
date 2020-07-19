@@ -128,6 +128,9 @@ class TimerPageState extends State<TimerPage> {
     return WillPopScope(
         onWillPop: _onBackPressed,
     child: new Scaffold(
+      appBar: AppBar(
+        title: Text("Timer")
+      ),
         body: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[

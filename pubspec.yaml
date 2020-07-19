@@ -25,6 +25,7 @@ dependencies:
     sdk: flutter
   http: ^0.12.1
   flutter_local_notifications: ^1.4.4+1
+  background_fetch: ^0.5.1
   path_provider: ^1.6.11
   rxdart: ^0.24.1
   workmanager: ^0.2.0
