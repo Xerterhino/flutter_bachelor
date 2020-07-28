@@ -79,7 +79,7 @@ class TimerPageState extends State<TimerPage> {
 
   void saveActivity(String id, String name, String duration) async {
     final http.Response response = await http.put(
-        'http://192.168.178.20:8080/api/activity/' + id,
+        'http://192.168.178.44:8080/api/activity/' + id,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -148,7 +148,7 @@ class TimerPageState extends State<TimerPage> {
         new Expanded(
           flex: 0,
           child: new Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.all(50.0),
             child: new Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[

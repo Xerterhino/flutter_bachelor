@@ -60,18 +60,7 @@ Future<void> main() async {
     );
   } else if (Platform.isIOS) {
     print("IOS");
-    //_showNotification();
-    BackgroundFetch.scheduleTask(TaskConfig(
-        taskId: 'com.transistorsoft.fetch',
-        delay: 60 * 60 * 1000  //  In one hour (milliseconds)
-    ));
-    BackgroundFetch.scheduleTask(TaskConfig(
-        taskId: "com.transistorsoft.fetch",
-        delay: 5000,  // <-- milliseconds
-        periodic: true,
-
-    ));
-
+    schedulePushTaskPeriodic();
   }
 
   runApp(
@@ -81,6 +70,16 @@ Future<void> main() async {
   );
 
   BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
+}
+
+void schedulePushTaskPeriodic() {
+  BackgroundFetch.scheduleTask(TaskConfig(
+    taskId: "com.background.fetchFlutter",
+    delay: 30000,  // <-- milliseconds
+    periodic: true,
+    enableHeadless: true,
+
+  ));
 }
 
 void callbackDispatcher() {
@@ -138,9 +137,6 @@ class TODO extends StatefulWidget {
 // This is the state for then TODO widget
 class TODOState extends State<TODO> {
   List<Activity> futureActivity = [];
-
-  bool _enabled = true;
-  int _status = 0;
   List<DateTime> _events = [];
 
   @override
@@ -160,64 +156,24 @@ class TODOState extends State<TODO> {
         requiresCharging: false,
         requiresStorageNotLow: false,
         requiresDeviceIdle: false
-    ), (String taskId) async {
-print("TASK  ID " + taskId);
-      switch (taskId) {
-        case 'com.transistorsoft.fetch':
-          print("Received custom task");
-          _showNotification();
-          break;
-        default:
-          print("Default fetch task");
-      }
-
-      // This is the fetch-event callback.
-      print("[BackgroundFetch] Event received $taskId");
-      setState(() {
-        _events.insert(0, new DateTime.now());
+    ), (String taskId) async       {
+        // This is the fetch-event callback.
+        print("[BackgroundFetch] taskId: $taskId");
+        // Use a switch statement to route task-handling.
+        switch (taskId) {
+          case 'com.background.fetchFlutter':
+            print("Received custom task: com.background.fetchFlutter");
+            _showNotification();
+            break;
+          default:
+            _showNotification();
+            print("Default fetch task");
+        }
+            // Finish, providing received taskId.
+        BackgroundFetch.finish(taskId);
       });
-      // IMPORTANT:  You must signal completion of your task or the OS can punish your app
-      // for taking too long in the background.
-      BackgroundFetch.finish(taskId);
-    }).then((int status) {
-      print('[BackgroundFetch] configure success: $status');
-      setState(() {
-        _status = status;
-      });
-    }).catchError((e) {
-      print('[BackgroundFetch] configure ERROR: $e');
-      setState(() {
-        _status = e;
-      });
-    });
 
-    // Optionally query the current BackgroundFetch status.
-    int status = await BackgroundFetch.status;
-    setState(() {
-      _status = status;
-    });
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
     if (!mounted) return;
-  }
-
-  void _onClickEnable(enabled) {
-    setState(() {
-      _enabled = enabled;
-    });
-    if (enabled) {
-      BackgroundFetch.start().then((int status) {
-        print('[BackgroundFetch] start success: $status');
-      }).catchError((e) {
-        print('[BackgroundFetch] start FAILURE: $e');
-      });
-    } else {
-      BackgroundFetch.stop().then((int status) {
-        print('[BackgroundFetch] stop success: $status');
-      });
-    }
   }
 
 

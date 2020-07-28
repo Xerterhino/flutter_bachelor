@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutterbachelor/activity.dart';
 import 'package:flutterbachelor/timer_page.dart';
+import 'package:background_fetch/background_fetch.dart';
 
 import 'package:http/http.dart' as http;
 
@@ -22,12 +23,13 @@ class _TODOListState extends State<TODOList> {
 
   @override
   void initState() {
-    getActivites();
     super.initState();
+    getActivites();
+
   }
 
   void getActivites() async {
-    final http.Response response = await http.get('http://192.168.178.20:8080/api/activity');
+    final http.Response response = await http.get('http://192.168.178.44:8080/api/activity');
     if (response.statusCode == 200) {
       final List responseData = json.decode(response.body);
       activities.clear();
@@ -44,7 +46,8 @@ class _TODOListState extends State<TODOList> {
 
       });
     } else {
-      throw Exception('Failed to load Activity');
+
+      throw Exception('Failed to load Activity ' + response.statusCode.toString() + json.decode(response.body).toString());
     }
   }
 
@@ -68,7 +71,7 @@ class _TODOListState extends State<TODOList> {
   }
 
   void deleteActivity(String activityId) async{
-    final http.Response response = await http.delete('http://192.168.178.20:8080/api/activity/' + activityId);
+    final http.Response response = await http.delete('http://192.168.178.44:8080/api/activity/' + activityId);
     if (response.statusCode == 200) {
 //      final List responseData = json.decode(response.body);
       getActivites();
@@ -77,7 +80,7 @@ class _TODOListState extends State<TODOList> {
     }
   }
   void createActivity(String name) async {
-    final http.Response response = await http.post('http://192.168.178.20:8080/api/activity/',
+    final http.Response response = await http.post('http://192.168.178.44:8080/api/activity/',
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
@@ -94,7 +97,15 @@ class _TODOListState extends State<TODOList> {
     }
   }
 
+  void schedulePushTaskPeriodic() {
+    BackgroundFetch.scheduleTask(TaskConfig(
+      taskId: "com.background.fetchFlutter",
+      delay: 30000,  // <-- milliseconds
+      periodic: true,
+      enableHeadless: true,
 
+    ));
+  }
 
   final TextEditingController controller = TextEditingController();
 
