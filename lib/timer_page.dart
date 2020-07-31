@@ -55,14 +55,21 @@ class TimerPageState extends State<TimerPage> {
     Key key,
   });
 
-  void leftButtonPressed() {
+  void resetWatch() {
     setState(() {
-      if (dependencies.stopwatch.isRunning) {
-        print("${dependencies.stopwatch.elapsedMilliseconds}");
-      } else {
         dependencies.stopwatch.reset();
         this.hasBeenReset = true;
-      }
+    });
+  }
+
+  void startWatch() {
+    setState(() {
+      dependencies.stopwatch.start();
+    });
+  }
+  void stopWatch() {
+    setState(() {
+      dependencies.stopwatch.stop();
     });
   }
 
@@ -140,11 +147,7 @@ class TimerPageState extends State<TimerPage> {
               duration: calcDuration,
               hasBeenReset: hasBeenReset),
         ),
-        Padding(
-            padding: EdgeInsets.all(16),
-            child: TextField(
-                controller: controller,
-                decoration: InputDecoration(labelText: 'Name'))),
+
         new Expanded(
           flex: 0,
           child: new Padding(
@@ -153,19 +156,31 @@ class TimerPageState extends State<TimerPage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 buildFloatingButton(
-                    dependencies.stopwatch.isRunning ? "lap" : "reset",
-                    leftButtonPressed),
+                    "stop",
+                    stopWatch),
                 buildFloatingButton(
-                    dependencies.stopwatch.isRunning ? "stop" : "start",
-                    rightButtonPressed),
+                    "reset",
+                    resetWatch),
                 buildFloatingButton(
-                    "Save",
-                    () => saveActivity(args.id, controller.text,
-                        getActualTimeElapsed(args.duration))),
+                    "start",
+                    startWatch),
               ],
             ),
           ),
         ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            buildFloatingButton(
+                "Save",
+                    () => saveActivity(args.id, controller.text,
+                    getActualTimeElapsed(args.duration)))],
+        ),
+        Padding(
+            padding: EdgeInsets.all(16),
+            child: TextField(
+                controller: controller,
+                decoration: InputDecoration(labelText: 'Name')))
       ],
     )));
   }
