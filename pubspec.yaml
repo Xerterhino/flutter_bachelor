@@ -5,7 +5,7 @@ description: Flutter Implementation for Thesis Project
 # pub.dev using `pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-# The following defines the version and build number for your application.
+# The following defines the version and build number for your application.-*
 # A version number is three numbers separated by dots, like 1.2.43
 # followed by an optional build number separated by a +.
 # Both the version and the builder number may be overridden in flutter
@@ -28,7 +28,6 @@ dependencies:
   background_fetch: ^0.5.1
   path_provider: ^1.6.11
   rxdart: ^0.24.1
-  workmanager: ^0.2.0
 
 
   # The following adds the Cupertino Icons font to your application.

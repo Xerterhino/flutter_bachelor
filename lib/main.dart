@@ -4,7 +4,6 @@ import 'package:flutterbachelor/local_notification.dart';
 import 'package:flutterbachelor/timer_page.dart';
 import 'package:flutterbachelor/todolist.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:workmanager/workmanager.dart';
 import 'dart:io' show Platform;
 import 'package:background_fetch/background_fetch.dart';
 
@@ -13,6 +12,7 @@ const myTask = "syncWithTheBackEnd";
 /// This "Headless Task" is run when app is terminated.
 void backgroundFetchHeadlessTask(String taskId) async {
   print('[BackgroundFetch] Headless event received.');
+  schedulePushTaskPeriodic();
   _showNotification();
   BackgroundFetch.finish(taskId);
 }
@@ -25,8 +25,6 @@ Future<void> main() async {
   await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
 
   var initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
-  // Note: permissions aren't requested here just to demonstrate that can be done later using the `requestPermissions()` method
-  // of the `IOSFlutterLocalNotificationsPlugin` class
   var initializationSettingsIOS = IOSInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -47,21 +45,24 @@ Future<void> main() async {
       });
 
 
-
-
-
   if(Platform.isAndroid){
-    Workmanager.initialize(callbackDispatcher);
-    Workmanager.registerPeriodicTask(
-      "1",
-      myTask, //This is the value that will be returned in the callbackDispatcher
-      initialDelay: Duration(seconds: 30),
-      //android erlaubt nur 15min frequency as default
-    );
+    BackgroundFetch.scheduleTask(TaskConfig(
+      taskId: "com.background.fetchFlutter",
+      delay: 30000,
+      periodic: true,
+      enableHeadless: true,
+
+    ));
   } else if (Platform.isIOS) {
-    print("IOS");
-    schedulePushTaskPeriodic();
+    BackgroundFetch.scheduleTask(TaskConfig(
+      taskId: "com.background.fetchFlutter",
+      delay: 30000,
+      periodic: true,
+      enableHeadless: true,
+
+    ));
   }
+
 
   runApp(
     MaterialApp(
@@ -83,31 +84,11 @@ void schedulePushTaskPeriodic() {
 }
 
 void callbackDispatcher() {
-  Workmanager.executeTask((task, inputData) {
-    print("Task" + task);
-    switch (task) {
-      case myTask:
-        print("this method was called from native! "+ task);
-        _showNotification();
-        break;
-      case Workmanager.iOSBackgroundTask:
-        print("iOS background fetch delegate ran " + task);
-        _showNotification();
-        break;
-      default:
-        print("DEFAULT");
-        _showNotification();
-
-    }
-    //Return true when the task executed successfully or not
-    return Future.value(true);
-  });
 }
 
 Future<void> _showNotification() async {
   var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'your channel id', 'your channel name', 'your channel description',
-      importance: Importance.Max, priority: Priority.High, ticker: 'ticker');
+      'your channel id', 'your channel name', 'your channel description');
   var iOSPlatformChannelSpecifics = IOSNotificationDetails();
   var platformChannelSpecifics = NotificationDetails(
       androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
@@ -145,9 +126,8 @@ class TODOState extends State<TODO> {
     initPlatformState();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    // Configure BackgroundFetch.
+
     BackgroundFetch.configure(BackgroundFetchConfig(
         minimumFetchInterval: 15,
         stopOnTerminate: false,
@@ -157,21 +137,14 @@ class TODOState extends State<TODO> {
         requiresStorageNotLow: false,
         requiresDeviceIdle: false
     ), (String taskId) async       {
-        // This is the fetch-event callback.
-        print("[BackgroundFetch] taskId: $taskId");
-        // Use a switch statement to route task-handling.
         switch (taskId) {
           case 'com.background.fetchFlutter':
-            print("Received custom task: com.background.fetchFlutter");
             _showNotification();
             break;
-          default:
-            _showNotification();
-            print("Default fetch task");
         }
-            // Finish, providing received taskId.
         BackgroundFetch.finish(taskId);
       });
+
 
     if (!mounted) return;
   }
@@ -180,12 +153,11 @@ class TODOState extends State<TODO> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'TODO app',
+      title: 'Activity Tracker',
       initialRoute: '/',
       routes: {
-        '/': (context) => TODOList(),
-        '/timer': (context) => TimerPage(name: "asd", duration: "111111", id: "asd"),
-        '/notification': (context) => HomePage(),
+        '/': (context) => AcitivityListView(),
+        '/timer': (context) => TimerPage(name: "xxx", duration: "111111", id: "xxx1"),
       },
     );
   }

@@ -7,18 +7,18 @@ import 'package:http/http.dart' as http;
 
 import 'dart:convert';
 
-class TODOList extends StatefulWidget {
+class AcitivityListView extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return _TODOListState();
+    return _AcitivityListViewState();
   }
 
   List<Activity> activities;
 
 }
 
-class _TODOListState extends State<TODOList> {
+class _AcitivityListViewState extends State<AcitivityListView> {
   final List<Activity> activities = [];
 
   @override

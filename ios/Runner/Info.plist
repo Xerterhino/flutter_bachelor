@@ -44,11 +44,15 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+
+
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>com.background.fetch</string>
 		<string>com.background.fetchFlutter</string>
 	</array>
+
+
+
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 </dict>
